@@ -1,20 +1,18 @@
 substitutions:
-  _REGION: asia-east1
   _SERVICE: bicycle-calculator
-  _REPOSITORY: cloud-run
 
 steps:
   - name: gcr.io/cloud-builders/docker
     args:
       - build
       - --tag
-      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_SERVICE}:$BUILD_ID
+      - asia.gcr.io/$PROJECT_ID/${_SERVICE}:$BUILD_ID
       - .
 
   - name: gcr.io/cloud-builders/docker
     args:
       - push
-      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_SERVICE}:$BUILD_ID
+      - asia.gcr.io/$PROJECT_ID/${_SERVICE}:$BUILD_ID
 
   - name: gcr.io/google.com/cloudsdktool/cloud-sdk
     entrypoint: gcloud
@@ -22,10 +20,10 @@ steps:
       - run
       - deploy
       - ${_SERVICE}
-      - --image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_SERVICE}:$BUILD_ID
-      - --region=${_REGION}
+      - --image=asia.gcr.io/$PROJECT_ID/${_SERVICE}:$BUILD_ID
+      - --region=asia-east1
       - --platform=managed
       - --allow-unauthenticated
 
 images:
-  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_SERVICE}:$BUILD_ID
+  - asia.gcr.io/$PROJECT_ID/${_SERVICE}:$BUILD_ID
