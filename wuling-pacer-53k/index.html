@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="透明、可調整的西進武嶺完賽時間與分段配速估算工具。" />
+    <title>武嶺配速器｜西進 53K</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css?v=1.1" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="回到頁首">
+        <span class="brand-mark">W</span>
+        <span>武嶺配速器</span>
+      </a>
+      <div class="route-badge"><span></span> 西進 · 53K / +2,800M</div>
+    </header>
+
+    <main id="top">
+      <section class="hero shell" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow">PULI → WULING · 3,275 M</p>
+          <h1 id="hero-title">把瓦數，換成<br /><em>抵達武嶺的時間。</em></h1>
+          <p class="intro">用重力、滾阻與風阻逐段解速度。每個會改變答案的數字，都攤在陽光下。</p>
+        </div>
+
+        <div class="result-card" aria-live="polite">
+          <div class="result-head">
+            <span>預估總時間</span>
+            <span id="goal-chip" class="goal-chip">計算中</span>
+          </div>
+          <div id="total-time" class="total-time">—:—:—</div>
+          <div class="result-meta">
+            <div><span>移動均速</span><strong id="avg-speed">—</strong></div>
+            <div><span id="intensity-label">低海拔強度</span><strong id="intensity-value">—</strong></div>
+            <div><span>完賽時刻</span><strong id="finish-clock">—</strong></div>
+          </div>
+          <div id="scenario-grid" class="scenario-grid"></div>
+        </div>
+
+        <div class="profile-card">
+          <div class="profile-head">
+            <div>
+              <span>路線剖面</span>
+              <strong>埔里地理中心碑 → 武嶺</strong>
+            </div>
+            <span class="mono">475M → 3,275M</span>
+          </div>
+          <svg id="profile-chart" viewBox="0 0 1000 240" role="img" aria-label="西進武嶺路線高度剖面"></svg>
+          <div id="profile-labels" class="profile-labels" aria-hidden="true"></div>
+        </div>
+      </section>
+
+      <section class="planner-section" aria-labelledby="planner-title">
+        <div class="shell planner-layout">
+          <aside class="control-panel">
+            <div class="section-heading">
+              <p class="eyebrow">YOUR INPUTS</p>
+              <h2 id="planner-title">設定你的條件</h2>
+              <p>AI 模式會把全程負荷預算分配到各路段：平緩長段省力，陡坡加壓，但永遠不超過高海拔修正後的 FTP。</p>
+            </div>
+
+            <form id="pace-form" novalidate>
+              <div id="form-errors" class="form-errors" role="alert" hidden></div>
+
+              <div class="mode-switch" role="group" aria-label="配速輸入方式">
+                <button class="mode-button active" type="button" data-mode="ai" aria-pressed="true">AI 配瓦</button>
+                <button class="mode-button" type="button" data-mode="ftp" aria-pressed="false">FTP 均瓦</button>
+                <button class="mode-button" type="button" data-mode="direct" aria-pressed="false">直接輸入瓦數</button>
+              </div>
+              <input id="pacingMode" name="pacingMode" type="hidden" value="ai" />
+
+              <fieldset>
+                <legend>人與車</legend>
+                <div class="field-grid">
+                  <label>體重 <span>kg</span><input id="riderKg" name="riderKg" type="number" min="35" max="150" step="0.1" value="60" /></label>
+                  <label>車重＋裝備 <span>kg</span><input id="bikeKg" name="bikeKg" type="number" min="5" max="25" step="0.1" value="10" /></label>
+                </div>
+                <div data-pacing-panel="ai ftp">
+                  <div class="field-grid">
+                    <label>FTP <span>W</span><input id="ftpW" name="ftpW" type="number" min="80" max="500" step="1" value="200" /></label>
+                    <label><b id="target-if-label">全程負荷預算</b> <span>% 當地 FTP</span><input id="targetIFPercent" name="targetIFPercent" type="number" min="55" max="95" step="1" value="78" /></label>
+                  </div>
+                  <div data-pacing-panel="ai">
+                    <label>平緩路段最低強度 <span>% 當地 FTP</span><input id="minimumIFPercent" name="minimumIFPercent" type="number" min="40" max="75" step="1" value="55" /></label>
+                  </div>
+                  <div class="derived-power">
+                    <span id="derived-label">AI 配瓦範圍</span>
+                    <strong id="derived-power">計算中</strong>
+                    <b id="intensity-badge">最佳化</b>
+                  </div>
+                  <p id="ftp-mode-hint" class="hint">78% 是「時間加權的相對負荷預算」，不是叫每段都騎 78%。最佳化器會在最低強度與當地有效 FTP 之間尋找更快的配瓦組合。</p>
+                </div>
+                <div data-pacing-panel="direct" hidden>
+                  <label>低海拔目標功率 <span>W</span><input id="targetPowerW" name="targetPowerW" type="number" min="80" max="500" step="1" value="200" /></label>
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <legend>當天環境</legend>
+                <div class="field-grid">
+                  <label>埔里氣溫 <span>°C</span><input id="startTempC" name="startTempC" type="number" min="-5" max="40" step="0.5" value="20" /></label>
+                  <label>迎風 <span>m/s</span><input id="headwindMs" name="headwindMs" type="number" min="-5" max="15" step="0.5" value="0" /></label>
+                  <label>海平面氣壓 <span>hPa</span><input id="seaLevelPressureHpa" name="seaLevelPressureHpa" type="number" min="950" max="1050" step="0.1" value="1013.25" /></label>
+                  <label>氣溫遞減率 <span>°C/km</span><input id="lapseRateCPerKm" name="lapseRateCPerKm" type="number" min="3" max="10" step="0.1" value="6.5" /></label>
+                </div>
+                <p class="hint">迎風填正數；順風填負數。風向視為全程不變，適合做敏感度估算。</p>
+              </fieldset>
+
+              <fieldset>
+                <legend>高海拔與車況</legend>
+                <div class="field-grid">
+                  <label>衰減起點 <span>m</span><input id="altitudeThresholdM" name="altitudeThresholdM" type="number" min="0" max="3000" step="100" value="1500" /></label>
+                  <label>每千米功率衰減 <span>%</span><input id="altitudeLossPercent" name="altitudeLossPercent" type="number" min="0" max="12" step="0.5" value="5" /></label>
+                  <label>CdA <span>m²</span><input id="cda" name="cda" type="number" min="0.18" max="0.6" step="0.01" value="0.32" /></label>
+                  <label>滾阻係數 Crr <span>—</span><input id="crr" name="crr" type="number" min="0.002" max="0.015" step="0.0005" value="0.0045" /></label>
+                  <label>傳動效率 <span>%</span><input id="drivetrainPercent" name="drivetrainPercent" type="number" min="85" max="100" step="0.5" value="97" /></label>
+                  <label>停留時間 <span>分鐘</span><input id="stoppedMinutes" name="stoppedMinutes" type="number" min="0" max="120" step="1" value="0" /></label>
+                </div>
+                <label>出發時間 <span>當地時間</span><input id="startTime" name="startTime" type="time" value="06:00" /></label>
+                <p class="hint">5% 是可修改的規劃係數，不是人體定律；若你有高海拔實騎資料，請優先用自己的衰減值。</p>
+              </fieldset>
+
+              <button class="primary-button" type="submit">重新計算配速 <span>→</span></button>
+              <button id="reset-button" class="text-button" type="button">恢復合理預設值</button>
+            </form>
+          </aside>
+
+          <div class="pace-output">
+            <div class="section-heading row-heading">
+              <div>
+                <p class="eyebrow">SPLIT PLAN</p>
+                <h2>七段配速表</h2>
+              </div>
+              <div class="mini-stat"><span>預估爬升率</span><strong id="vam">—</strong></div>
+              <div class="mini-stat"><span>作功</span><strong id="energy">—</strong></div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>路段</th><th>距離 / 坡度</th><th>建議功率</th><th>均速</th><th>分段</th><th>抵達</th></tr></thead>
+                <tbody id="split-table"></tbody>
+              </table>
+            </div>
+            <div class="pace-note">
+              <span>AI 配瓦怎麼讀</span>
+              <p>AI 會降低地理中心碑至人止關的功率，把負荷留給後續陡坡。表中的百分比都相對於該海拔的有效 FTP；100% 就是硬上限，不使用超 FTP 的 W′ 或衝刺功率。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="method-section shell" aria-labelledby="method-title">
+        <div class="method-intro">
+          <p class="eyebrow">NO MYSTERY CONSTANTS</p>
+          <h2 id="method-title">這個答案怎麼來的</h2>
+          <p>它是規劃工具，不是比賽保證書。每一段用輪上功率平衡重力、滾動阻力與空氣阻力，再以二分法解出穩態速度。</p>
+          <div class="formula" aria-label="功率模型公式">P<sub>輪</sub> = (mg sinθ + Crr·mg cosθ + ½ρCdA(v+w)²) · v</div>
+        </div>
+
+        <div class="method-grid">
+          <article>
+            <span class="method-no">01</span>
+            <h3>路線資料</h3>
+            <p>基準為埔里地理中心碑至武嶺 53 km、爬升 2,800 m、終點 3,275 m。七段公開摘要四捨五入後合計 54 km，本站按其距離與坡度權重正規化至總里程與總爬升。</p>
+            <div class="source-links">
+              <a href="https://en.wikipedia.org/wiki/Wuling_(mountain_pass)" target="_blank" rel="noreferrer">西進總覽 ↗</a>
+              <a href="https://cyclingtime.com/" target="_blank" rel="noreferrer">七段資料來源：單車時代 ↗</a>
+            </div>
+          </article>
+          <article>
+            <span class="method-no">02</span>
+            <h3>物理與大氣</h3>
+            <p>功率式沿用公路車功率模型的重力、滾阻與風阻項。空氣密度以 ISA 對海拔的氣壓式，加上你輸入的氣溫與氣壓計算；g = 9.80665 m/s²、乾空氣氣體常數 287.0528 J/(kg·K)。</p>
+            <div class="source-links">
+              <a href="https://doi.org/10.1123/jab.14.3.276" target="_blank" rel="noreferrer">Martin et al., 1998 ↗</a>
+              <a href="https://en.wikipedia.org/wiki/International_Standard_Atmosphere" target="_blank" rel="noreferrer">ISA 標準大氣 ↗</a>
+            </div>
+          </article>
+          <article>
+            <span class="method-no">03</span>
+            <h3>AI 最佳化約束</h3>
+            <p>目標是最短完賽時間；約束是「時間加權平均相對強度」不得超過負荷預算。每段以 0.5% FTP 搜尋，範圍從你設定的最低強度到 100% 當地有效 FTP。坡度與距離透過物理模型自然影響分配，沒有隱藏的坡度加成表。</p>
+            <div class="source-links">
+              <a href="https://help.trainingpeaks.com/hc/en-us/articles/204071744-Training-Stress-Scores-TSS-Explained" target="_blank" rel="noreferrer">TrainingPeaks：FTP／IF／TSS ↗</a>
+              <a href="https://arxiv.org/abs/2403.03363" target="_blank" rel="noreferrer">Bos et al.：爬坡時間最佳化 ↗</a>
+              <a href="https://pubmed.ncbi.nlm.nih.gov/9715971/" target="_blank" rel="noreferrer">Fulco et al., 1998 ↗</a>
+            </div>
+          </article>
+        </div>
+
+        <div class="limits">
+          <strong>模型沒有算進去：</strong>
+          <span>依目前設定，FTP 上限只隨高海拔下降，不另外模擬騎乘疲勞或 W′ 消耗；也未計入加速與煞車、彎道、路面與風向變化、補給、交通、實際 GPS 起伏，以及個人熱衰竭或急性高山反應。後段長時間接近 Z4 的方案應視為理論上限。</span>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>武嶺配速器 · 透明模型 v1.1</span>
+      <span>結果僅供訓練與路線規劃</span>
+    </footer>
+    <script type="module" src="app.js?v=1.1"></script>
+  </body>
+</html>
