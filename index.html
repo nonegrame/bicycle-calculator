@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="自行車配速規劃、訓練預測與騎乘資訊計算工具。" />
+    <title>騎乘計算室｜自行車資訊工具</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <style>
+      :root { --ink: #17261e; --pine: #254b3a; --mist: #e8eee8; --stone: #f6f4ef; --amber: #d9792b; --line: #cbd5cc; }
+      * { box-sizing: border-box; }
+      body { margin: 0; color: var(--ink); background: var(--stone); font-family: "Noto Sans TC", sans-serif; }
+      a { color: inherit; text-decoration: none; }
+      .shell { width: min(1120px, calc(100% - 40px)); margin: auto; }
+      .topbar { height: 76px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(23, 38, 30, .15); }
+      .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: .03em; }
+      .brand-mark { display: grid; width: 29px; height: 29px; place-items: center; border-radius: 50%; color: white; background: var(--pine); font-family: "DM Mono", monospace; }
+      .topbar span:last-child, .eyebrow, .stat-label { font-family: "DM Mono", monospace; font-size: .72rem; letter-spacing: .08em; }
+      .topbar span:last-child { color: #587061; }
+      .hero { min-height: 520px; padding: 90px 0 64px; position: relative; overflow: hidden; }
+      .hero::after { content: "3,275M"; position: absolute; right: -8px; top: 44px; z-index: -1; color: #e0e5dd; font: 900 clamp(5rem, 18vw, 13rem)/1 "DM Mono", monospace; letter-spacing: -.1em; }
+      .eyebrow { margin: 0 0 16px; color: var(--amber); font-weight: 500; }
+      h1 { max-width: 820px; margin: 0; font-size: clamp(3.2rem, 7vw, 6.6rem); line-height: 1.06; letter-spacing: -.07em; }
+      h1 em { color: var(--pine); font-style: normal; }
+      .intro { max-width: 530px; margin: 25px 0 0; font-size: 1.12rem; line-height: 1.85; color: #506056; }
+      .route-line { display: flex; gap: 8px; align-items: center; margin-top: 48px; color: var(--pine); font: 500 .78rem "DM Mono", monospace; letter-spacing: .04em; }
+      .route-line i { width: min(38vw, 340px); height: 1px; background: var(--pine); display: block; }
+      .tools { padding: 72px 0 88px; background: var(--pine); color: white; }
+      .section-heading { display: flex; align-items: end; justify-content: space-between; margin-bottom: 26px; }
+      h2 { margin: 0; font-size: clamp(1.8rem, 4vw, 2.8rem); letter-spacing: -.05em; }
+      .section-heading p { max-width: 340px; margin: 0; color: #c4d2c8; line-height: 1.65; font-size: .92rem; }
+      .tool-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+      .tool { min-height: 360px; padding: 30px; display: flex; flex-direction: column; background: #eff2eb; color: var(--ink); transition: transform .2s, box-shadow .2s; }
+      .tool:hover { transform: translateY(-5px); box-shadow: 0 13px 0 rgba(0, 0, 0, .15); }
+      .tool-number { color: var(--amber); font: 500 .8rem "DM Mono", monospace; }
+      .tool h3 { margin: auto 0 12px; font-size: clamp(1.7rem, 3vw, 2.5rem); letter-spacing: -.06em; }
+      .tool p { min-height: 78px; margin: 0; color: #526158; line-height: 1.7; }
+      .tool-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 28px; padding-top: 18px; border-top: 1px solid var(--line); font-weight: 800; }
+      .arrow { color: var(--amber); font: 1.5rem "DM Mono", monospace; }
+      .guide { padding: 90px 0; }
+      .guide-grid { display: grid; grid-template-columns: .8fr 1.2fr; gap: 10vw; }
+      .guide-copy p { color: #536158; line-height: 1.8; }
+      .steps { border-top: 1px solid var(--line); }
+      .step { display: grid; grid-template-columns: 50px 1fr; gap: 16px; padding: 20px 0; border-bottom: 1px solid var(--line); }
+      .step strong { font: 500 .8rem "DM Mono", monospace; color: var(--amber); }
+      .step h3 { margin: 0 0 5px; font-size: 1.08rem; }
+      .step p { margin: 0; color: #5d6b61; font-size: .92rem; line-height: 1.6; }
+      .note { padding: 23px 0; border-top: 1px solid var(--line); color: #607066; font-size: .82rem; line-height: 1.7; }
+      .manifesto { padding: 72px 0; color: #eff2eb; background: #1c3428; }
+      .manifesto-grid { display: grid; grid-template-columns: .8fr 1.2fr; gap: 10vw; }
+      .manifesto .eyebrow { color: #e6a04e; }
+      .manifesto h2 { max-width: 360px; }
+      .manifesto-copy { margin: 0; font-size: 1.15rem; line-height: 1.85; color: #d2ddd4; }
+      .principles { margin: 28px 0 0; padding: 0; list-style: none; border-top: 1px solid rgba(239, 242, 235, .2); }
+      .principles li { display: grid; grid-template-columns: 34px 1fr; gap: 12px; padding: 14px 0; border-bottom: 1px solid rgba(239, 242, 235, .2); color: #c1d0c4; line-height: 1.6; }
+      .principles strong { color: #e6a04e; font: 500 .75rem "DM Mono", monospace; }
+      footer { padding: 24px 0 32px; background: #17261e; color: #c4d2c8; font: .72rem "DM Mono", monospace; }
+      @media (max-width: 680px) { .topbar span:last-child { display: none; } .hero { min-height: 460px; padding-top: 68px; } .section-heading, .guide-grid, .manifesto-grid { display: block; } .section-heading p { margin-top: 14px; } .tool-grid { grid-template-columns: 1fr; } .tool { min-height: 290px; } .guide-copy, .manifesto h2 { margin-bottom: 36px; } }
+    </style>
+  </head>
+  <body>
+    <header class="shell topbar">
+      <a class="brand" href="/"><span class="brand-mark">R</span><span>騎乘計算室</span></a>
+      <span>CYCLING DATA / PLAN / RIDE</span>
+    </header>
+    <main>
+      <section class="shell hero">
+        <p class="eyebrow">CYCLING INFORMATION TOOLS</p>
+        <h1>把騎乘資料，<br /><em>變成下一步決策。</em></h1>
+        <p class="intro">從配速、功率到訓練準備度，用可調整的條件與透明的計算，讓每一次挑戰都有更清楚的依據。</p>
+        <div class="route-line"><span>資料輸入</span><i></i><span>更好的騎乘計畫</span></div>
+      </section>
+      <section class="tools">
+        <div class="shell">
+          <div class="section-heading"><h2>從需求選擇工具</h2><p>工具可獨立使用；先評估準備度，再安排適合當日條件的騎乘策略。</p></div>
+          <div class="tool-grid">
+            <a class="tool" href="/pacer/"><span class="tool-number">01 / RIDE PLAN</span><h3>武嶺配速器</h3><p>依據 FTP、體重、車重、天氣與風況，計算預估時間、均速與七段配速。支援 AI 配瓦、FTP 均瓦與直接輸入功率。</p><span class="tool-footer">規劃完賽策略 <span class="arrow">→</span></span></a>
+            <a class="tool" href="/predict/"><span class="tool-number">02 / TRAINING READINESS</span><h3>訓練預測器</h3><p>以目標時間、FTP、近期騎乘量、最長爬坡與訓練負荷，評估目前達標機率並找出優先補強項目。</p><span class="tool-footer">檢查準備程度 <span class="arrow">→</span></span></a>
+          </div>
+        </div>
+      </section>
+      <section class="shell guide">
+        <div class="guide-grid">
+          <div class="guide-copy"><p class="eyebrow">START HERE</p><h2>用資料，做更好的決策。</h2><p>工具提供可理解的規劃依據，而不是保證成績。訓練、補給、天候、路況與個人狀態，仍需在實際騎乘中持續調整。</p></div>
+          <div class="steps">
+            <div class="step"><strong>01</strong><div><h3>先設定挑戰目標</h3><p>在訓練預測器輸入預期完賽時間與近期訓練資料，了解目標是否合理。</p></div></div>
+            <div class="step"><strong>02</strong><div><h3>找出目前的缺口</h3><p>比較功率餘裕、長時間耐力及訓練穩定性，決定下一個訓練重點。</p></div></div>
+            <div class="step"><strong>03</strong><div><h3>規劃當日配速</h3><p>使用配速器分配功率與負荷，查看七個路段的速度、分段時間與抵達時間。</p></div></div>
+          </div>
+        </div>
+      </section>
+      <section class="manifesto">
+        <div class="shell manifesto-grid">
+          <div><p class="eyebrow">AI MANIFESTO</p><h2>AI 是副駕，不是替你握把手的人。</h2></div>
+          <div>
+            <p class="manifesto-copy">我們使用 AI 協助整理騎乘資料、解釋模型結果與找出可行選項。它的價值在於讓資訊更容易理解，不在於假裝知道每個人的身體、道路與當天狀況。</p>
+            <ul class="principles">
+              <li><strong>01</strong><span>可說明的結果：提供輸入條件與計算脈絡，讓你知道建議從何而來。</span></li>
+              <li><strong>02</strong><span>不把預測當承諾：所有估算都有誤差，實際騎乘判斷永遠優先。</span></li>
+              <li><strong>03</strong><span>騎士保有主導權：你可以調整假設、比較情境，決定什麼才適合自己。</span></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+      <div class="shell note">結果僅供訓練與路線規劃。模型未涵蓋個人疲勞、補給、交通、實際路況、風向變化與環境反應。</div>
+    </main>
+    <footer><div class="shell">騎乘計算室 / TRANSPARENT CYCLING TOOLS</div></footer>
+  </body>
+</html>
