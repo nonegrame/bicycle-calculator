@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>西進武嶺｜訓練預測器</title>
+  <title>西進武嶺訓練預測器｜沒有朋友單車計算機</title>
   <meta name="description" content="根據近期 COROS 單車訓練與目標時間，估算西進武嶺完賽機率。" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,7 +15,7 @@
   <main class="shell">
     <header>
       <div><p class="eyebrow">ROAD TO 3,275 M</p><h1>西進武嶺<br><span>訓練預測器</span></h1></div>
-      <button id="sourceBtn" class="coros"><span class="pulse"></span><span><b id="sourceName">COROS</b><small id="sourceState">示範資料模式</small></span></button>
+      <button id="sourceBtn" class="coros"><span class="pulse"></span><span><b id="sourceName">COROS</b><small id="sourceState">測試中｜示範資料</small></span></button>
     </header>
 
     <section class="grid">
@@ -33,7 +33,7 @@
           <label>車重＋裝備 <span><input id="bike" type="number" min="5" max="30" step="0.1" value="10"> kg</span></label>
           <label>距離比賽 <span><input id="weeks" type="number" min="1" max="52" value="24"> 週</span></label>
         </div>
-        <div class="section-title compact"><span>02</span><div><h2>近期訓練</h2><p>尚未連線時可自行調整示範數據</p></div></div>
+        <div class="section-title compact"><span>02</span><div><h2>近期訓練（測試中）</h2><p>COROS MCP 尚未串接，目前請自行調整示範數據</p></div></div>
         <div class="form-grid">
           <label>28 天騎乘量 <span><input id="volume" type="number" min="0" max="2000" value="420"> km</span></label>
           <label>最長爬坡時間 <span><input id="climb" type="number" min="0" max="360" value="150"> 分</span></label>
@@ -76,10 +76,10 @@
       <button class="source-option active" data-source="coros" role="radio" aria-checked="true"><b>COROS</b><small>活動、分圈、功率、訓練負荷與 FIT 詳細資料</small></button>
       <button class="source-option" data-source="garmin" role="radio" aria-checked="false"><b>Fitness AI Connector</b><small>Garmin 活動、功率／心率區間、分圈、HRV 與恢復趨勢</small></button>
     </div>
-    <p id="sourceDescription">完成 COROS 連線後，預測器會分析最近 8 週的單車活動與爬坡能力。</p>
+    <p id="sourceDescription">COROS MCP 尚未串接，目前使用示範資料測試預測模型。</p>
     <div class="sync-list" id="syncList"><span>活動與分圈</span><span>功率與心率</span><span>訓練負荷</span><span>FIT 詳細資料</span></div>
     <button id="demoSync" class="primary">載入 COROS 示範摘要</button>
-    <small id="sourceHint">目前以示範資料運作；需先在 ChatGPT 完成 COROS 授權。</small>
+    <small id="sourceHint">功能測試中；COROS MCP 尚未串接，目前僅提供示範摘要。</small>
   </dialog>
   <script src="app.js"></script>
 </body>

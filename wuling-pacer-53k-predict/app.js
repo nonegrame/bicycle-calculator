@@ -44,15 +44,15 @@ inputs.forEach(id=>$(id).addEventListener("change",calculate));
 const dialog=$("sourceDialog");let selectedSource="coros";
 $("sourceBtn").onclick=()=>dialog.showModal();dialog.querySelector(".close").onclick=()=>dialog.close();
 const sourceData={
-  coros:{name:"COROS",desc:"完成 COROS 連線後，預測器會分析最近 8 週的單車活動與爬坡能力。",items:["活動與分圈","功率與心率","訓練負荷","FIT 詳細資料"],demo:[468,172,365,12]},
-  garmin:{name:"Fitness AI Connector",desc:"連結 Garmin 帳號後，預測器會分析近期活動、功率與心率區間，並納入 HRV 與恢復趨勢。",items:["活動與分圈","功率與心率區間","HRV 與睡眠","週間趨勢"],demo:[446,165,352,13]}
+  coros:{name:"COROS",desc:"COROS MCP 尚未串接，目前使用示範資料測試預測模型。",items:["活動與分圈（規劃中）","功率與心率（規劃中）","訓練負荷（規劃中）","FIT 詳細資料（規劃中）"],demo:[468,172,365,12]},
+  garmin:{name:"Fitness AI Connector",desc:"資料來源整合功能測試中，目前使用示範資料測試預測模型。",items:["活動與分圈（規劃中）","功率與心率區間（規劃中）","HRV 與睡眠（規劃中）","週間趨勢（規劃中）"],demo:[446,165,352,13]}
 };
 document.querySelectorAll(".source-option").forEach(btn=>btn.onclick=()=>{
   selectedSource=btn.dataset.source;const data=sourceData[selectedSource];
   document.querySelectorAll(".source-option").forEach(x=>{x.classList.toggle("active",x===btn);x.setAttribute("aria-checked",x===btn)});
   $("sourceDescription").textContent=data.desc;$("syncList").innerHTML=data.items.map(x=>`<span>${x}</span>`).join("");
-  $("demoSync").textContent=`載入 ${data.name} 示範摘要`;$("sourceHint").textContent=`目前以示範資料運作；需先在 ChatGPT 完成 ${data.name} 授權。`;
+  $("demoSync").textContent=`載入 ${data.name} 示範摘要`;$("sourceHint").textContent=`功能測試中；${data.name} 尚未串接，目前僅提供示範摘要。`;
 });
-$("demoSync").onclick=()=>{const data=sourceData[selectedSource];["volume","climb","load","intensity"].forEach((id,i)=>$(id).value=data.demo[i]);$("sourceName").textContent=data.name;$("sourceState").textContent="已同步示範摘要";dialog.close();calculate()};
+$("demoSync").onclick=()=>{const data=sourceData[selectedSource];["volume","climb","load","intensity"].forEach((id,i)=>$(id).value=data.demo[i]);$("sourceName").textContent=data.name;$("sourceState").textContent="測試中｜示範資料";dialog.close();calculate()};
 calculate();
 if(document.modelContext?.registerTool){document.modelContext.registerTool({name:"predict_wuling_goal",title:"預測西進武嶺目標",description:"設定目標時間與訓練指標，更新頁面上的達標機率。",inputSchema:{type:"object",properties:{hours:{type:"number",minimum:2,maximum:8},minutes:{type:"number",minimum:0,maximum:59}},required:["hours","minutes"],additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:false},execute:({hours,minutes})=>{$("hours").value=hours;$("minutes").value=minutes;return calculate()}})}
