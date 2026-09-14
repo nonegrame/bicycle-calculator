@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="以坡度、齒比與轉速估算自行車爬坡所需功率、時間、能量與 FTP 風險。" />
+    <title>爬坡齒比功率計算機｜沒有朋友單車計算機</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar shell">
+      <a class="brand" href="/"><span class="brand-mark">沒</span><span>沒有朋友單車計算機</span></a>
+      <span>CLIMB / GEAR / POWER</span>
+    </header>
+    <main>
+      <section class="hero shell">
+        <div>
+          <p class="eyebrow">STEADY CLIMB ESTIMATE</p>
+          <h1>這個齒比，<br /><em>撐得住這個坡嗎？</em></h1>
+          <p>齒比與轉速先決定地速，再用重力、滾阻與風阻反推所需瓦數。把它和 FTP 放在一起看，提早發現會把自己踩爆的設定。</p>
+        </div>
+        <section class="result-card" aria-live="polite" aria-label="計算結果">
+          <div class="result-top"><span>所需穩態功率</span><b id="riskChip" class="risk-chip">計算中</b></div>
+          <strong id="power" class="power">— W</strong>
+          <div class="primary-results">
+            <div><span>目前齒比</span><b id="ratio">—</b></div>
+            <div><span>地速</span><b id="speed">—</b></div>
+            <div><span>相對 FTP</span><b id="ftpPercent">—</b></div>
+          </div>
+          <p id="riskNote" class="result-note"></p>
+        </section>
+      </section>
+
+      <section class="work-area">
+        <div class="shell layout">
+          <form id="climb-form" class="form-panel" novalidate>
+            <div class="section-heading"><p class="eyebrow">YOUR SETUP</p><h2>設定坡度與傳動</h2><p>先用你會實際踩的檔位與舒服轉速，再確認這個速度需要多少瓦數。</p></div>
+            <p id="formErrors" class="form-errors" role="alert" hidden></p>
+            <fieldset>
+              <legend>坡與騎士</legend>
+              <div class="field-grid">
+                <label>均勻坡度 <span>%</span><input id="gradePercent" type="number" min="0" max="30" step="0.1" value="8" /></label>
+                <label>路段距離 <span>km</span><input id="distanceKm" type="number" min="0.1" max="300" step="0.1" value="5" /></label>
+                <label>總重量 <span>人＋車＋裝備 kg</span><input id="massKg" type="number" min="35" max="180" step="0.1" value="70" /></label>
+                <label>FTP <span>W</span><input id="ftpW" type="number" min="80" max="600" step="1" value="200" /></label>
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend>齒比與轉速</legend>
+              <label>常見公路傳動預設<select id="gearPreset"></select></label>
+              <div id="presetGearFields" class="field-grid">
+                <label>目前前盤<select id="frontSelect"></select></label>
+                <label>目前飛輪<select id="rearSelect"></select></label>
+              </div>
+              <div id="manualGearFields" class="field-grid" hidden>
+                <label>前盤齒數 <span>T</span><input id="frontTeeth" type="number" min="20" max="60" step="1" value="34" /></label>
+                <label>飛輪齒數 <span>T</span><input id="rearTeeth" type="number" min="10" max="60" step="1" value="34" /></label>
+              </div>
+              <button id="manualGearToggle" class="text-button" type="button" aria-pressed="false">手動輸入齒數</button>
+              <div class="field-grid">
+                <label>轉速 <span>RPM</span><input id="cadenceRpm" type="number" min="20" max="140" step="1" value="70" /></label>
+                <label>輪胎尺寸<select id="wheelSize"></select></label>
+              </div>
+              <label>輪周長 <span>m</span><input id="wheelCircumferenceM" type="number" min="1.5" max="2.5" step="0.001" value="2.136" /></label>
+            </fieldset>
+            <details>
+              <summary>進階環境與車況設定</summary>
+              <div class="field-grid advanced-fields">
+                <label>滾阻 Crr <input id="crr" type="number" min="0.001" max="0.02" step="0.0005" value="0.0045" /></label>
+                <label>CdA <span>m²</span><input id="cda" type="number" min="0.15" max="0.8" step="0.01" value="0.32" /></label>
+                <label>空氣密度 <span>kg/m³</span><input id="airDensity" type="number" min="0.7" max="1.4" step="0.001" value="1.225" /></label>
+                <label>風速 <span>迎風＋ / 順風− m/s</span><input id="headwindMs" type="number" min="-15" max="20" step="0.5" value="0" /></label>
+                <label>傳動效率 <span>%</span><input id="drivetrainPercent" type="number" min="85" max="100" step="0.5" value="97" /></label>
+              </div>
+            </details>
+            <button class="primary-button" type="submit">重新計算 <span>→</span></button>
+            <button id="resetButton" class="text-button reset" type="button">恢復預設值</button>
+          </form>
+          <section class="output-panel" aria-label="分析結果">
+            <div class="section-heading row-heading"><div><p class="eyebrow">WHAT THIS MEANS</p><h2>這段坡的代價</h2></div></div>
+            <div class="stats-grid">
+              <article><span>預估爬坡時間</span><strong id="time">—</strong></article>
+              <article><span>騎乘能量</span><strong id="energy">—</strong></article>
+              <article><span>維持的轉速</span><strong id="cadenceDisplay">70 RPM</strong></article>
+            </div>
+            <article id="recommendations" class="recommendations">
+              <p class="eyebrow">ADJUSTMENT OPTIONS</p>
+              <h3 id="recommendationTitle">計算中</h3>
+              <p id="recommendationCopy"></p>
+              <label class="target-input">目標上限 <span><input id="targetFtpPercent" type="number" min="60" max="100" step="1" value="85" /> % FTP</span></label>
+              <ul id="gearRecommendations"></ul>
+            </article>
+            <article class="method-card">
+              <p class="eyebrow">TRANSPARENT MODEL</p>
+              <h3>答案怎麼來的</h3>
+              <p>先以 <code>RPM × 前盤/飛輪 × 輪周長</code> 求地速；再將重力、滾阻與風阻換成輪上功率，最後除以傳動效率。</p>
+              <div class="formula">P<sub>騎士</sub> = (mg sinθ + Crr·mg cosθ + ½ρCdA(v+w)²) · v ÷ η</div>
+              <p class="fine-print">FTP 分區採 Z1 ≤55%、Z2 ≤75%、Z3 ≤90%、Z4 ≤105%、Z5 ≤120%、Z6 ≤150%、Z7 &gt;150% FTP。Z6、Z7 可短暫使用，但不適合當作固定坡的維持配速。</p>
+              <p class="fine-print">這是等速、固定坡度的規劃估算，不含加減速、彎道、路面變化、疲勞、補給或高海拔生理衰減。FTP 也不是任何時長的保證功率。</p>
+            </article>
+          </section>
+        </div>
+      </section>
+    </main>
+    <footer class="shell"><span>爬坡齒比功率計算機 · 透明模型 v1.0</span><span>結果僅供訓練與路線規劃</span></footer>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
